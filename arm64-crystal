@@ -28,19 +28,16 @@ if [ -z "$1" ]
 fi
 
 command=${1}
-switches=${2}
-program_file=${3}
-arguments=${4}
-all_arguments=$@
+arguments=${@:2}
 
 caller_directory=$(pwd)
 
 command_target_file="$script_path/commands/$command"
 
 if [ ! -f $command_target_file ]; then
-    docker run -v $caller_directory:/crystal-project-env docker-arm64-crystalcross-compiler crystal $command $switches $program_file $arguments
+    docker run -v $caller_directory:/crystal-project-env docker-arm64-crystalcross-compiler crystal $command $arguments
     exit
 fi
 
-$command_target_file $switches $program_file $arguments
+$command_target_file $arguments
 

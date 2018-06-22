@@ -12,7 +12,7 @@ Usage
 ----
 Just clone the repository and run arm64-crystal wrapper, to invoke a limited set of commands on your local working directory
 
-`clone `\
+`clone https://github.com/n00ax/crystal-arm-crosscompile.git`\
 `./arm64-crystal run src/[file].cr`
 
 Contributing
