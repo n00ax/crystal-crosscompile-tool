@@ -1,0 +1,60 @@
+#!/bin/bash
+
+if [ "$(docker images -q multiarch/qemu-user-static)" = "" ]; then
+    echo "This Machine Does Not Appear To Be Setup To Execute Multiarch Images, Setting Up..."
+    docker run --rm --privileged multiarch/qemu-user-static:register
+fi
+
+script_path=$(dirname $([ -L $0 ] && realpath $0 || echo $0))
+target_architecture_name=${1}
+target_command=${2}
+arguments=${@:2}
+
+if [ -z "$1" ]
+    then
+        echo "No target architecture selected, available architectures include,"
+        echo "arm64, aarch64, amd64, armhf, i386, x86_64, x86"
+        echo "Usage: cross-crystal [arch] [command] [switches] [program file] [--] arguments" 
+    exit
+fi
+
+cross_image_lookup_result="$(docker images -q crystalcross-$target_architecture_name-env)"
+
+if [ "$cross_image_lookup_result" = "" ]; then
+    echo "No built Docker images detected, building"
+    $script_path/docker/build-images $target_architecture_name  "crystalcross-$target_architecture_name-env" ""
+fi
+
+create_fail=$?
+
+if [ "$target_command" = "create-target" ]; then
+    create_target_architecture_name=${3}
+    create_target_name=${4}
+    create_target_build_cmd=${5}
+
+    if [ "$create_target_architecture_name" = "" ] || [ "$create_target_name" = "" ] || [ "$create_target_build_cmd" = "" ]; then
+        echo "Usage: [arch] [new_image_name] [build_commands]"
+        exit
+    fi
+
+    $script_path/docker/build-images $create_target_architecture_name "crystalcross-$create_target_name-env" $create_target_build_cmd
+    printf "==================>\nNew Image Created!, archname=$create_target_name, tag=crystalcross-$create_target_name-env\n==================>"
+    
+    exit
+fi
+
+if [ "$target_command" = "shell" ]; then
+    docker run -it -v $(pwd):/build-env -w /build-env crystalcross-$target_architecture_name-env /bin/sh
+    exit
+fi
+
+if [ "$target_command" = "" ] || [ "$target_command" = "help" ]; then
+    if [ $create_fail = 0 ]; then
+        docker run -v $(pwd):/build-env -w /build-env crystalcross-$target_architecture_name-env crystal
+        echo "    shell                    (cross-crystal wrapper) opens docker container shell"
+        echo "    create_target            (cross-crystal wrapper) creates custom docker image"
+        exit
+    fi
+fi
+
+docker run -v $(pwd):/build-env -w /build-env crystalcross-$target_architecture_name-env crystal $arguments 

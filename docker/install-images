@@ -1,9 +1,0 @@
-#!/bin/bash
-
-echo "Building Docker images"
-
-cd "${0%/*}"
-
-docker build -f docker-compiler/Dockerfile . -t docker-arm64-crystalcross-compiler
-docker build -f docker-linker/Dockerfile . -t docker-arm64-crystalcross-linker
-docker build -f docker-emulator/Dockerfile . -t docker-arm64-crystalcross-emulator

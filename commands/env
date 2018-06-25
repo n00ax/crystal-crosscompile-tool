@@ -1,6 +1,0 @@
-#!/bin/bash
-
-echo "=======================>"
-docker run -w /crystal-project-env -v $current_directory:/crystal-project-env \
-    docker-arm64-crystalcross-compiler bash -c \
-    "printf 'Crystal Cross Compile Docker ENV => ' && uname -a  && echo '=======================>' && crystal env"
