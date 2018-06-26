@@ -5,4 +5,5 @@ FROM multiarch/alpine:${target_architecture_name}-edge
 
 RUN apk add alpine-sdk
 RUN apk add crystal
-RUN $target_build_commands
+RUN apk add shards
+RUN sh -c ":;$target_build_commands"
